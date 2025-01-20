@@ -64,7 +64,7 @@ enum InboundEventType {
 }
 
 /// The required return value for event handler functions. It is a ubiquitous Result type for convenience.
-pub type EventHandlerResult = Result<(), anyhow::Error>;
+pub type EventHandlerResult<T = ()> = Result<T, anyhow::Error>;
 
 /// A trait requiring methods for handling global events.
 #[allow(unused_variables)]
