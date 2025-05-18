@@ -22,7 +22,7 @@ impl OutboundEventManager {
 		Self { sink }
 	}
 
-	async fn send_event(&mut self, event: impl Serialize) -> Result<(), Error> {
+	pub async fn send_event(&mut self, event: impl Serialize) -> Result<(), Error> {
 		self.sink
 			.send(Message::Text(serde_json::to_string(&event).unwrap().into()))
 			.await
