@@ -11,7 +11,6 @@ pub use outbound::{OutboundEventManager, OUTBOUND_EVENT_MANAGER};
 pub type SettingsValue = serde_json::Value;
 
 struct CliArgs {
-	_command: String,
 	port: String,
 	uuid: String,
 	event: String,
@@ -22,12 +21,19 @@ pub async fn init_plugin(
 	global_event_handler: impl inbound::GlobalEventHandler,
 	action_event_handler: impl inbound::ActionEventHandler,
 ) -> Result<(), anyhow::Error> {
-	let mut args = std::env::args();
+	let args: Vec<_> = std::env::args().collect();
 	let args = CliArgs {
-		_command: args.next().unwrap(),
-		port: args.nth(1).unwrap(),
-		uuid: args.nth(1).unwrap(),
-		event: args.nth(1).unwrap(),
+		port: args[args.iter().position(|x| x.to_lowercase().trim() == "-port").unwrap() + 1].clone(),
+		uuid: args[args
+			.iter()
+			.position(|x| x.to_lowercase().trim() == "-pluginuuid")
+			.unwrap() + 1]
+			.clone(),
+		event: args[args
+			.iter()
+			.position(|x| x.to_lowercase().trim() == "-registerevent")
+			.unwrap() + 1]
+			.clone(),
 	};
 
 	let socket = connect_async(format!("ws://localhost:{}", args.port)).await?.0;
