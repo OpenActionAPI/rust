@@ -29,6 +29,7 @@ pub struct DeviceDidDisconnectEvent {
 #[derive(Clone, Debug, Deserialize)]
 pub struct SetImageEvent {
 	pub device: String,
+	pub controller: Option<String>,
 	pub position: Option<u8>,
 	pub image: Option<String>,
 }
