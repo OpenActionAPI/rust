@@ -293,7 +293,7 @@ pub(crate) async fn process_incoming_messages(
 					action_event_handler.title_parameters_did_change(event, outbound).await
 				}
 			} {
-				log::error!("Failed to process inbound event: {}", error.to_string())
+				log::error!("Failed to process inbound event: {}", error)
 			}
 		}
 	}

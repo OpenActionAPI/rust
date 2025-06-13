@@ -8,8 +8,8 @@ categories = [
 	"web-programming::websocket",
 ]
 authors = ["ninjadev64"]
-version = "1.1.4"
-edition = "2021"
+version = "1.1.5"
+edition = "2024"
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/OpenActionAPI/rust"
