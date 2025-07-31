@@ -45,6 +45,7 @@ enum InboundEventType {
 	/* Global events */
 	SetImage(SetImageEvent),
 	SetBrightness(SetBrightnessEvent),
+	SetIdleTimeBeforeSleep(SetIdleTimeBeforeSleepEvent),
 	DidReceiveGlobalSettings(DidReceiveGlobalSettingsEvent),
 	DeviceDidConnect(DeviceDidConnectEvent),
 	DeviceDidDisconnect(DeviceDidDisconnectEvent),
@@ -84,6 +85,14 @@ pub trait GlobalEventHandler {
 	fn set_brightness(
 		&self,
 		event: SetBrightnessEvent,
+		outbound: &mut OutboundEventManager,
+	) -> impl Future<Output = EventHandlerResult> + Send {
+		async { Ok(()) }
+	}
+
+	fn set_idle_time_before_sleep(
+		&self,
+		event: SetIdleTimeBeforeSleepEvent,
 		outbound: &mut OutboundEventManager,
 	) -> impl Future<Output = EventHandlerResult> + Send {
 		async { Ok(()) }
@@ -256,6 +265,7 @@ pub(crate) async fn process_incoming_messages(
 				/* Global events */
 				InboundEventType::SetImage(event) => global_event_handler.set_image(event, outbound).await,
 				InboundEventType::SetBrightness(event) => global_event_handler.set_brightness(event, outbound).await,
+				InboundEventType::SetIdleTimeBeforeSleep(event) => global_event_handler.set_idle_time_before_sleep(event, outbound).await,
 				InboundEventType::DidReceiveGlobalSettings(event) => {
 					global_event_handler.did_receive_global_settings(event, outbound).await
 				}

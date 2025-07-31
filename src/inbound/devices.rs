@@ -39,3 +39,9 @@ pub struct SetBrightnessEvent {
 	pub device: String,
 	pub brightness: u8,
 }
+
+#[derive(Clone, Debug, Deserialize)]
+pub struct SetIdleTimeBeforeSleepEvent {
+	pub device: String,
+	pub seconds: i32,
+}
