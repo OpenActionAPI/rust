@@ -1,49 +1,62 @@
 mod inbound;
 mod outbound;
+mod runtime;
 
-use tokio_tungstenite::connect_async;
+pub use crate::inbound::{Coordinates, TitleParametersDidChangePayload};
+pub use crate::runtime::*;
+pub use inbound::{GlobalEventHandler, set_global_event_handler};
+
+/// [`mod@async_trait`]
+pub use async_trait::async_trait;
 
 use futures_util::StreamExt;
+use thiserror::Error;
+use tokio_tungstenite::connect_async;
 
-pub use inbound::*;
-pub use outbound::{OutboundEventManager, OUTBOUND_EVENT_MANAGER};
+#[derive(Debug, Error)]
+pub enum OpenActionError {
+	#[error("WebSocket error: {0}")]
+	WebSocket(#[from] tokio_tungstenite::tungstenite::Error),
 
-pub type SettingsValue = serde_json::Value;
-
-struct CliArgs {
-	port: String,
-	uuid: String,
-	event: String,
+	#[error("serialization or deserialization error: {0}")]
+	Serde(#[from] serde_json::Error),
 }
 
-/// Initialise the plugin and register it with the OpenAction server.
-pub async fn init_plugin(
-	global_event_handler: impl inbound::GlobalEventHandler,
-	action_event_handler: impl inbound::ActionEventHandler,
-) -> Result<(), anyhow::Error> {
-	let args: Vec<_> = std::env::args().collect();
-	let args = CliArgs {
-		port: args[args.iter().position(|x| x.to_lowercase().trim() == "-port").unwrap() + 1].clone(),
-		uuid: args[args
-			.iter()
-			.position(|x| x.to_lowercase().trim() == "-pluginuuid")
-			.unwrap() + 1]
-			.clone(),
-		event: args[args
-			.iter()
-			.position(|x| x.to_lowercase().trim() == "-registerevent")
-			.unwrap() + 1]
-			.clone(),
-	};
+pub type OpenActionResult<T> = Result<T, OpenActionError>;
 
-	let socket = connect_async(format!("ws://localhost:{}", args.port)).await?.0;
+/// Register the plugin and run the plugin event loop, blocking until disconnect
+/// ```rust
+/// use openaction::*;
+///
+/// #[tokio::main]
+/// async fn main() {
+///     // Initialize logger...
+///     // Register actions...
+///     run(std::env::args().collect()).await;
+/// }
+/// ```
+pub async fn run(args: Vec<String>) -> OpenActionResult<()> {
+	let lookup = |flag: &str| -> String {
+		let i = args
+			.iter()
+			.position(|x| x.to_lowercase().trim() == flag)
+			.unwrap_or_else(|| panic!("missing CLI flag: {}", flag));
+		args.get(i + 1)
+			.cloned()
+			.unwrap_or_else(|| panic!("missing CLI flag value for flag: {}", flag))
+	};
+	let port = lookup("-port");
+	let uuid = lookup("-pluginuuid");
+	let event = lookup("-registerevent");
+
+	let socket = connect_async(format!("ws://localhost:{}", port)).await?.0;
 	let (write, read) = socket.split();
 
-	let mut outbound = OutboundEventManager::new(write);
-	outbound.register(args.event, args.uuid).await?;
-	*outbound::OUTBOUND_EVENT_MANAGER.lock().await = Some(outbound);
+	let mut outbound = outbound::OutboundEventManager::new(write);
+	outbound.register(event, uuid).await?;
+	runtime::set_outbound_manager(outbound).await;
 
-	inbound::process_incoming_messages(read, global_event_handler, action_event_handler).await;
+	inbound::process_incoming_messages(read).await;
 
 	Ok(())
 }

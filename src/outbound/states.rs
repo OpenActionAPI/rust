@@ -1,7 +1,8 @@
 use super::{ContextAndPayloadEvent, ContextEvent, OutboundEventManager};
 
+use crate::OpenActionResult as Result;
+
 use serde::Serialize;
-use tokio_tungstenite::tungstenite::Error;
 
 #[derive(Serialize)]
 struct SetTitlePayload {
@@ -21,7 +22,7 @@ struct SetStatePayload {
 }
 
 impl OutboundEventManager {
-	pub async fn set_title(&mut self, context: String, title: Option<String>, state: Option<u16>) -> Result<(), Error> {
+	pub async fn set_title(&mut self, context: String, title: Option<String>, state: Option<u16>) -> Result<()> {
 		self.send_event(ContextAndPayloadEvent {
 			event: "setTitle",
 			context,
@@ -30,7 +31,7 @@ impl OutboundEventManager {
 		.await
 	}
 
-	pub async fn set_image(&mut self, context: String, image: Option<String>, state: Option<u16>) -> Result<(), Error> {
+	pub async fn set_image(&mut self, context: String, image: Option<String>, state: Option<u16>) -> Result<()> {
 		self.send_event(ContextAndPayloadEvent {
 			event: "setImage",
 			context,
@@ -39,7 +40,7 @@ impl OutboundEventManager {
 		.await
 	}
 
-	pub async fn set_state(&mut self, context: String, state: u16) -> Result<(), Error> {
+	pub async fn set_state(&mut self, context: String, state: u16) -> Result<()> {
 		self.send_event(ContextAndPayloadEvent {
 			event: "setState",
 			context,
@@ -48,7 +49,7 @@ impl OutboundEventManager {
 		.await
 	}
 
-	pub async fn show_alert(&mut self, context: String) -> Result<(), Error> {
+	pub async fn show_alert(&mut self, context: String) -> Result<()> {
 		self.send_event(ContextEvent {
 			event: "showAlert",
 			context,
@@ -56,7 +57,7 @@ impl OutboundEventManager {
 		.await
 	}
 
-	pub async fn show_ok(&mut self, context: String) -> Result<(), Error> {
+	pub async fn show_ok(&mut self, context: String) -> Result<()> {
 		self.send_event(ContextEvent {
 			event: "showOk",
 			context,

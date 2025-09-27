@@ -1,4 +1,4 @@
-use super::{Coordinates, GenericInstancePayload};
+use super::{Coordinates, GenericInstancePayload, SettingsValue};
 
 use serde::Deserialize;
 
@@ -14,6 +14,7 @@ pub struct AppearEvent {
 pub struct PropertyInspectorAppearEvent {
 	pub action: String,
 	pub context: String,
+	#[allow(dead_code)]
 	pub device: String,
 }
 
@@ -21,6 +22,7 @@ pub struct PropertyInspectorAppearEvent {
 pub struct TitleParametersDidChangeEvent {
 	pub action: String,
 	pub context: String,
+	#[allow(dead_code)]
 	pub device: String,
 	pub payload: TitleParametersDidChangePayload,
 }
@@ -28,7 +30,7 @@ pub struct TitleParametersDidChangeEvent {
 #[derive(Clone, Debug, Deserialize)]
 #[allow(non_snake_case)]
 pub struct TitleParametersDidChangePayload {
-	pub settings: crate::SettingsValue,
+	pub settings: SettingsValue,
 	pub coordinates: Coordinates,
 	pub state: u16,
 	pub title: String,

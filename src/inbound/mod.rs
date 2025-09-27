@@ -12,26 +12,28 @@ pub use misc::*;
 pub use settings::*;
 pub use will_appear::*;
 
-use crate::outbound::OutboundEventManager;
+use crate::{OpenActionResult as Result, runtime::inbound as runtime};
 
-use std::future::Future;
+use std::sync::OnceLock;
 
-use futures_util::{stream::SplitStream, StreamExt};
+use async_trait::async_trait;
+use futures_util::{StreamExt, stream::SplitStream};
 use serde::Deserialize;
-use tokio_tungstenite::{tungstenite::Message, MaybeTlsStream, WebSocketStream};
+use tokio_tungstenite::{MaybeTlsStream, WebSocketStream, tungstenite::Message};
 
-/// A representation of the coordinates of an action instance.
+type SettingsValue = serde_json::Value;
+
+/// The coordinates of an action instance on the device surface
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, Eq)]
 pub struct Coordinates {
 	pub row: u8,
 	pub column: u8,
 }
 
-/// A representation of the payload data that accompanies events related to actions.
 #[derive(Clone, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct GenericInstancePayload {
-	pub settings: crate::SettingsValue,
+pub(crate) struct GenericInstancePayload {
+	pub settings: SettingsValue,
 	pub coordinates: Coordinates,
 	pub controller: String,
 	pub state: u16,
@@ -63,168 +65,52 @@ enum InboundEventType {
 	TitleParametersDidChange(TitleParametersDidChangeEvent),
 }
 
-/// The required return value for event handler functions. It is a ubiquitous Result type for convenience.
-pub type EventHandlerResult<T = ()> = Result<T, anyhow::Error>;
-
-/// A trait requiring methods for handling global events.
-#[allow(unused_variables)]
-pub trait GlobalEventHandler {
-	fn plugin_ready(&self, outbound: &mut OutboundEventManager) -> impl Future<Output = EventHandlerResult> + Send {
-		async { Ok(()) }
+#[async_trait]
+/// Event handler trait for events that do not relate to a specific instance of an action
+pub trait GlobalEventHandler: Send + Sync {
+	async fn plugin_ready(&self) -> Result<()> {
+		Ok(())
 	}
 
-	fn set_image(
-		&self,
-		event: SetImageEvent,
-		outbound: &mut OutboundEventManager,
-	) -> impl Future<Output = EventHandlerResult> + Send {
-		async { Ok(()) }
+	async fn device_plugin_set_image(&self, _event: SetImageEvent) -> Result<()> {
+		Ok(())
 	}
 
-	fn set_brightness(
-		&self,
-		event: SetBrightnessEvent,
-		outbound: &mut OutboundEventManager,
-	) -> impl Future<Output = EventHandlerResult> + Send {
-		async { Ok(()) }
+	async fn device_plugin_set_brightness(&self, _event: SetBrightnessEvent) -> Result<()> {
+		Ok(())
 	}
 
-	fn did_receive_global_settings(
-		&self,
-		event: DidReceiveGlobalSettingsEvent,
-		outbound: &mut OutboundEventManager,
-	) -> impl Future<Output = EventHandlerResult> + Send {
-		async { Ok(()) }
+	async fn did_receive_global_settings(&self, _event: DidReceiveGlobalSettingsEvent) -> Result<()> {
+		Ok(())
 	}
 
-	fn device_did_connect(
-		&self,
-		event: DeviceDidConnectEvent,
-		outbound: &mut OutboundEventManager,
-	) -> impl Future<Output = EventHandlerResult> + Send {
-		async { Ok(()) }
+	async fn device_did_connect(&self, _event: DeviceDidConnectEvent) -> Result<()> {
+		Ok(())
 	}
 
-	fn device_did_disconnect(
-		&self,
-		event: DeviceDidDisconnectEvent,
-		outbound: &mut OutboundEventManager,
-	) -> impl Future<Output = EventHandlerResult> + Send {
-		async { Ok(()) }
+	async fn device_did_disconnect(&self, _event: DeviceDidDisconnectEvent) -> Result<()> {
+		Ok(())
 	}
 
-	fn system_did_wake_up(
-		&self,
-		event: SystemDidWakeUpEvent,
-		outbound: &mut OutboundEventManager,
-	) -> impl Future<Output = EventHandlerResult> + Send {
-		async { Ok(()) }
+	async fn system_did_wake_up(&self, _event: SystemDidWakeUpEvent) -> Result<()> {
+		Ok(())
 	}
 }
 
-/// A trait requiring methods for handling events related to an action.
-#[allow(unused_variables)]
-pub trait ActionEventHandler {
-	fn key_down(
-		&self,
-		event: KeyEvent,
-		outbound: &mut OutboundEventManager,
-	) -> impl Future<Output = EventHandlerResult> + Send {
-		async { Ok(()) }
-	}
+static GLOBAL_EVENT_HANDLER: OnceLock<&'static dyn GlobalEventHandler> = OnceLock::new();
 
-	fn key_up(
-		&self,
-		event: KeyEvent,
-		outbound: &mut OutboundEventManager,
-	) -> impl Future<Output = EventHandlerResult> + Send {
-		async { Ok(()) }
-	}
-
-	fn dial_down(
-		&self,
-		event: DialPressEvent,
-		outbound: &mut OutboundEventManager,
-	) -> impl Future<Output = EventHandlerResult> + Send {
-		async { Ok(()) }
-	}
-
-	fn dial_up(
-		&self,
-		event: DialPressEvent,
-		outbound: &mut OutboundEventManager,
-	) -> impl Future<Output = EventHandlerResult> + Send {
-		async { Ok(()) }
-	}
-
-	fn dial_rotate(
-		&self,
-		event: DialRotateEvent,
-		outbound: &mut OutboundEventManager,
-	) -> impl Future<Output = EventHandlerResult> + Send {
-		async { Ok(()) }
-	}
-
-	fn did_receive_settings(
-		&self,
-		event: DidReceiveSettingsEvent,
-		outbound: &mut OutboundEventManager,
-	) -> impl Future<Output = EventHandlerResult> + Send {
-		async { Ok(()) }
-	}
-
-	fn will_appear(
-		&self,
-		event: AppearEvent,
-		outbound: &mut OutboundEventManager,
-	) -> impl Future<Output = EventHandlerResult> + Send {
-		async { Ok(()) }
-	}
-
-	fn will_disappear(
-		&self,
-		event: AppearEvent,
-		outbound: &mut OutboundEventManager,
-	) -> impl Future<Output = EventHandlerResult> + Send {
-		async { Ok(()) }
-	}
-
-	fn property_inspector_did_appear(
-		&self,
-		event: PropertyInspectorAppearEvent,
-		outbound: &mut OutboundEventManager,
-	) -> impl Future<Output = EventHandlerResult> + Send {
-		async { Ok(()) }
-	}
-
-	fn property_inspector_did_disappear(
-		&self,
-		event: PropertyInspectorAppearEvent,
-		outbound: &mut OutboundEventManager,
-	) -> impl Future<Output = EventHandlerResult> + Send {
-		async { Ok(()) }
-	}
-
-	fn title_parameters_did_change(
-		&self,
-		event: TitleParametersDidChangeEvent,
-		outbound: &mut OutboundEventManager,
-	) -> impl Future<Output = EventHandlerResult> + Send {
-		async { Ok(()) }
-	}
+/// Register the handler for global events (does nothing if already set)
+pub fn set_global_event_handler(handler: &'static dyn GlobalEventHandler) {
+	let _ = GLOBAL_EVENT_HANDLER.set(handler);
 }
 
 pub(crate) async fn process_incoming_messages(
 	mut stream: SplitStream<WebSocketStream<MaybeTlsStream<tokio::net::TcpStream>>>,
-	global_event_handler: impl GlobalEventHandler,
-	action_event_handler: impl ActionEventHandler,
 ) {
+	if let Some(handler) = GLOBAL_EVENT_HANDLER.get()
+		&& let Err(error) = handler.plugin_ready().await
 	{
-		let mut lock = crate::outbound::OUTBOUND_EVENT_MANAGER.lock().await;
-		let outbound = lock.as_mut().unwrap();
-		if let Err(error) = global_event_handler.plugin_ready(outbound).await {
-			log::error!("Failed to run plugin ready handler: {}", error);
-		}
+		log::error!("Failed to run plugin ready handler: {}", error);
 	}
 
 	while let Some(message) = stream.next().await {
@@ -236,61 +122,71 @@ pub(crate) async fn process_incoming_messages(
 			let decoded: InboundEventType = match serde_json::from_str(&text) {
 				Ok(event) => event,
 				Err(_) => {
-					log::warn!(
-						"Unknown event received: {}",
-						serde_json::from_str::<serde_json::Value>(&text)
-							.unwrap()
-							.as_object()
-							.unwrap()
-							.get("event")
-							.unwrap()
-					);
+					log::warn!("Unknown event received: {}", text);
 					continue;
 				}
 			};
 
-			let mut lock = crate::outbound::OUTBOUND_EVENT_MANAGER.lock().await;
-			let outbound = lock.as_mut().unwrap();
-
 			if let Err(error) = match decoded {
-				/* Global events */
-				InboundEventType::SetImage(event) => global_event_handler.set_image(event, outbound).await,
-				InboundEventType::SetBrightness(event) => global_event_handler.set_brightness(event, outbound).await,
+				InboundEventType::SetImage(event) => {
+					if let Some(h) = GLOBAL_EVENT_HANDLER.get() {
+						h.device_plugin_set_image(event).await
+					} else {
+						Ok(())
+					}
+				}
+				InboundEventType::SetBrightness(event) => {
+					if let Some(h) = GLOBAL_EVENT_HANDLER.get() {
+						h.device_plugin_set_brightness(event).await
+					} else {
+						Ok(())
+					}
+				}
 				InboundEventType::DidReceiveGlobalSettings(event) => {
-					global_event_handler.did_receive_global_settings(event, outbound).await
+					if let Some(h) = GLOBAL_EVENT_HANDLER.get() {
+						h.did_receive_global_settings(event).await
+					} else {
+						Ok(())
+					}
 				}
 				InboundEventType::DeviceDidConnect(event) => {
-					global_event_handler.device_did_connect(event, outbound).await
+					if let Some(h) = GLOBAL_EVENT_HANDLER.get() {
+						h.device_did_connect(event).await
+					} else {
+						Ok(())
+					}
 				}
 				InboundEventType::DeviceDidDisconnect(event) => {
-					global_event_handler.device_did_disconnect(event, outbound).await
+					if let Some(h) = GLOBAL_EVENT_HANDLER.get() {
+						h.device_did_disconnect(event).await
+					} else {
+						Ok(())
+					}
 				}
 				InboundEventType::SystemDidWakeUp(event) => {
-					global_event_handler.system_did_wake_up(event, outbound).await
+					if let Some(h) = GLOBAL_EVENT_HANDLER.get() {
+						h.system_did_wake_up(event).await
+					} else {
+						Ok(())
+					}
 				}
-				/* Action events */
-				InboundEventType::KeyDown(event) => action_event_handler.key_down(event, outbound).await,
-				InboundEventType::KeyUp(event) => action_event_handler.key_up(event, outbound).await,
-				InboundEventType::DialDown(event) => action_event_handler.dial_down(event, outbound).await,
-				InboundEventType::DialUp(event) => action_event_handler.dial_up(event, outbound).await,
-				InboundEventType::DialRotate(event) => action_event_handler.dial_rotate(event, outbound).await,
-				InboundEventType::DidReceiveSettings(event) => {
-					action_event_handler.did_receive_settings(event, outbound).await
-				}
-				InboundEventType::WillAppear(event) => action_event_handler.will_appear(event, outbound).await,
-				InboundEventType::WillDisappear(event) => action_event_handler.will_disappear(event, outbound).await,
+				/* Instance events */
+				InboundEventType::KeyDown(event) => runtime::handle_key_down(event).await,
+				InboundEventType::KeyUp(event) => runtime::handle_key_up(event).await,
+				InboundEventType::DialDown(event) => runtime::handle_dial_down(event).await,
+				InboundEventType::DialUp(event) => runtime::handle_dial_up(event).await,
+				InboundEventType::DialRotate(event) => runtime::handle_dial_rotate(event).await,
+				InboundEventType::DidReceiveSettings(event) => runtime::handle_did_receive_settings(event).await,
+				InboundEventType::WillAppear(event) => crate::runtime::handle_will_appear(event).await,
+				InboundEventType::WillDisappear(event) => crate::runtime::handle_will_disappear(event).await,
 				InboundEventType::PropertyInspectorDidAppear(event) => {
-					action_event_handler
-						.property_inspector_did_appear(event, outbound)
-						.await
+					runtime::handle_property_inspector_did_appear(event).await
 				}
 				InboundEventType::PropertyInspectorDidDisappear(event) => {
-					action_event_handler
-						.property_inspector_did_disappear(event, outbound)
-						.await
+					runtime::handle_property_inspector_did_disappear(event).await
 				}
 				InboundEventType::TitleParametersDidChange(event) => {
-					action_event_handler.title_parameters_did_change(event, outbound).await
+					runtime::handle_title_parameters_did_change(event).await
 				}
 			} {
 				log::error!("Failed to process inbound event: {}", error)

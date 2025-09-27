@@ -1,9 +1,8 @@
-use crate::SettingsValue;
-
 use super::{ContextAndPayloadEvent, OutboundEventManager, PayloadEvent};
 
+use crate::OpenActionResult as Result;
+
 use serde::Serialize;
-use tokio_tungstenite::tungstenite::Error;
 
 #[derive(Serialize)]
 struct RegisterEvent {
@@ -22,11 +21,11 @@ struct LogMessagePayload {
 }
 
 impl OutboundEventManager {
-	pub(crate) async fn register(&mut self, event: String, uuid: String) -> Result<(), Error> {
+	pub(crate) async fn register(&mut self, event: String, uuid: String) -> Result<()> {
 		self.send_event(RegisterEvent { event, uuid }).await
 	}
 
-	pub async fn open_url(&mut self, url: String) -> Result<(), Error> {
+	pub async fn open_url(&mut self, url: String) -> Result<()> {
 		self.send_event(PayloadEvent {
 			event: "openUrl",
 			payload: OpenUrlPayload { url },
@@ -34,7 +33,7 @@ impl OutboundEventManager {
 		.await
 	}
 
-	pub async fn log_message(&mut self, message: String) -> Result<(), Error> {
+	pub async fn log_message(&mut self, message: String) -> Result<()> {
 		self.send_event(PayloadEvent {
 			event: "logMessage",
 			payload: LogMessagePayload { message },
@@ -42,7 +41,7 @@ impl OutboundEventManager {
 		.await
 	}
 
-	pub async fn send_to_property_inspector(&mut self, context: String, payload: SettingsValue) -> Result<(), Error> {
+	pub async fn send_to_property_inspector(&mut self, context: String, payload: serde_json::Value) -> Result<()> {
 		self.send_event(ContextAndPayloadEvent {
 			event: "sendToPropertyInspector",
 			context,

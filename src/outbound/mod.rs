@@ -3,17 +3,17 @@ mod misc;
 mod settings;
 mod states;
 
-use futures_util::{stream::SplitSink, SinkExt};
+use crate::OpenActionResult as Result;
+
+use futures_util::{SinkExt, stream::SplitSink};
 use serde::Serialize;
-use std::sync::LazyLock;
-use tokio::sync::Mutex;
-use tokio_tungstenite::tungstenite::{Error, Message};
+use tokio_tungstenite::tungstenite::Message;
 
 type Sink =
 	SplitSink<tokio_tungstenite::WebSocketStream<tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>>, Message>;
 
-/// A struct with methods for sending events to the OpenAction server.
-pub struct OutboundEventManager {
+/// A struct with methods for sending events to the OpenAction server
+pub(crate) struct OutboundEventManager {
 	sink: Sink,
 }
 
@@ -22,15 +22,13 @@ impl OutboundEventManager {
 		Self { sink }
 	}
 
-	pub async fn send_event(&mut self, event: impl Serialize) -> Result<(), Error> {
+	pub async fn send_event(&mut self, event: impl Serialize) -> Result<()> {
 		self.sink
-			.send(Message::Text(serde_json::to_string(&event).unwrap().into()))
-			.await
+			.send(Message::Text(serde_json::to_string(&event)?.into()))
+			.await?;
+		Ok(())
 	}
 }
-
-/// The outbound event manager available for access outside of event handlers.
-pub static OUTBOUND_EVENT_MANAGER: LazyLock<Mutex<Option<OutboundEventManager>>> = LazyLock::new(|| Mutex::new(None));
 
 #[derive(Serialize)]
 struct SimpleEvent {

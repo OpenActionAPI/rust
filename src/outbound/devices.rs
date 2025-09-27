@@ -1,7 +1,8 @@
 use super::{OutboundEventManager, PayloadEvent};
 
+use crate::OpenActionResult as Result;
+
 use serde::Serialize;
-use tokio_tungstenite::tungstenite::Error;
 
 #[derive(Clone, Serialize)]
 pub struct DeviceInfo {
@@ -35,7 +36,7 @@ impl OutboundEventManager {
 		columns: u8,
 		encoders: u8,
 		r#type: u8,
-	) -> Result<(), Error> {
+	) -> Result<()> {
 		self.send_event(PayloadEvent {
 			event: "registerDevice",
 			payload: DeviceInfo {
@@ -50,7 +51,7 @@ impl OutboundEventManager {
 		.await
 	}
 
-	pub async fn deregister_device(&mut self, id: String) -> Result<(), Error> {
+	pub async fn deregister_device(&mut self, id: String) -> Result<()> {
 		self.send_event(PayloadEvent {
 			event: "deregisterDevice",
 			payload: id,
@@ -58,7 +59,7 @@ impl OutboundEventManager {
 		.await
 	}
 
-	pub async fn rerender_images(&mut self, id: String) -> Result<(), Error> {
+	pub async fn rerender_images(&mut self, id: String) -> Result<()> {
 		self.send_event(PayloadEvent {
 			event: "rerenderImages",
 			payload: id,
@@ -66,7 +67,7 @@ impl OutboundEventManager {
 		.await
 	}
 
-	pub async fn key_down(&mut self, device: String, position: u8) -> Result<(), Error> {
+	pub async fn key_down(&mut self, device: String, position: u8) -> Result<()> {
 		self.send_event(PayloadEvent {
 			event: "keyDown",
 			payload: PressPayload { device, position },
@@ -74,7 +75,7 @@ impl OutboundEventManager {
 		.await
 	}
 
-	pub async fn key_up(&mut self, device: String, position: u8) -> Result<(), Error> {
+	pub async fn key_up(&mut self, device: String, position: u8) -> Result<()> {
 		self.send_event(PayloadEvent {
 			event: "keyUp",
 			payload: PressPayload { device, position },
@@ -82,7 +83,7 @@ impl OutboundEventManager {
 		.await
 	}
 
-	pub async fn encoder_change(&mut self, device: String, position: u8, ticks: i16) -> Result<(), Error> {
+	pub async fn encoder_change(&mut self, device: String, position: u8, ticks: i16) -> Result<()> {
 		self.send_event(PayloadEvent {
 			event: "encoderChange",
 			payload: TicksPayload {
@@ -94,7 +95,7 @@ impl OutboundEventManager {
 		.await
 	}
 
-	pub async fn encoder_down(&mut self, device: String, position: u8) -> Result<(), Error> {
+	pub async fn encoder_down(&mut self, device: String, position: u8) -> Result<()> {
 		self.send_event(PayloadEvent {
 			event: "encoderDown",
 			payload: PressPayload { device, position },
@@ -102,7 +103,7 @@ impl OutboundEventManager {
 		.await
 	}
 
-	pub async fn encoder_up(&mut self, device: String, position: u8) -> Result<(), Error> {
+	pub async fn encoder_up(&mut self, device: String, position: u8) -> Result<()> {
 		self.send_event(PayloadEvent {
 			event: "encoderUp",
 			payload: PressPayload { device, position },

@@ -1,11 +1,9 @@
-use crate::SettingsValue;
-
 use super::{ContextAndPayloadEvent, ContextEvent, OutboundEventManager, PayloadEvent, SimpleEvent};
 
-use tokio_tungstenite::tungstenite::Error;
+use crate::OpenActionResult as Result;
 
 impl OutboundEventManager {
-	pub async fn set_settings(&mut self, context: String, payload: SettingsValue) -> Result<(), Error> {
+	pub async fn set_settings(&mut self, context: String, payload: serde_json::Value) -> Result<()> {
 		self.send_event(ContextAndPayloadEvent {
 			event: "setSettings",
 			context,
@@ -14,7 +12,7 @@ impl OutboundEventManager {
 		.await
 	}
 
-	pub async fn get_settings(&mut self, context: String) -> Result<(), Error> {
+	pub async fn get_settings(&mut self, context: String) -> Result<()> {
 		self.send_event(ContextEvent {
 			event: "getSettings",
 			context,
@@ -22,7 +20,7 @@ impl OutboundEventManager {
 		.await
 	}
 
-	pub async fn set_global_settings(&mut self, payload: SettingsValue) -> Result<(), Error> {
+	pub async fn set_global_settings(&mut self, payload: serde_json::Value) -> Result<()> {
 		self.send_event(PayloadEvent {
 			event: "setGlobalSettings",
 			payload,
@@ -30,7 +28,7 @@ impl OutboundEventManager {
 		.await
 	}
 
-	pub async fn get_global_settings(&mut self) -> Result<(), Error> {
+	pub async fn get_global_settings(&mut self) -> Result<()> {
 		self.send_event(SimpleEvent {
 			event: "getGlobalSettings",
 		})
