@@ -27,7 +27,7 @@ impl Action for CounterAction {
 		let mut clone = settings.clone();
 		clone.value = settings.value + 1;
 		instance.set_settings(&clone).await?;
-		instance.set_title(clone.value.to_string()).await
+		instance.set_title(Some(clone.value.to_string()), None).await
 	}
 }
 

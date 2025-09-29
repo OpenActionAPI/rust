@@ -32,18 +32,18 @@ impl Instance {
 	}
 
 	/// <https://openaction.amankhanna.me/5_serverbound/states.html#settitle>
-	pub async fn set_title(&self, title: impl Into<String>) -> Result<()> {
+	pub async fn set_title(&self, title: Option<impl Into<String>>, state: Option<u16>) -> Result<()> {
 		if let Some(mgr) = self.outbound().await.as_mut() {
-			mgr.set_title(self.instance_id.clone(), Some(title.into()), None)
+			mgr.set_title(self.instance_id.clone(), title.map(Into::into), state)
 				.await?;
 		}
 		Ok(())
 	}
 
 	/// <https://openaction.amankhanna.me/5_serverbound/states.html#setimage>
-	pub async fn set_image(&self, image: impl Into<String>) -> Result<()> {
+	pub async fn set_image(&self, image: Option<impl Into<String>>, state: Option<u16>) -> Result<()> {
 		if let Some(mgr) = self.outbound().await.as_mut() {
-			mgr.set_image(self.instance_id.clone(), Some(image.into()), None)
+			mgr.set_image(self.instance_id.clone(), image.map(Into::into), state)
 				.await?;
 		}
 		Ok(())

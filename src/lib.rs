@@ -29,10 +29,10 @@ pub type OpenActionResult<T> = Result<T, OpenActionError>;
 /// use openaction::*;
 ///
 /// #[tokio::main]
-/// async fn main() {
+/// async fn main() -> OpenActionResult<()> {
 ///     // Initialize logger...
 ///     // Register actions...
-///     run(std::env::args().collect()).await;
+///     run(std::env::args().collect()).await
 /// }
 /// ```
 pub async fn run(args: Vec<String>) -> OpenActionResult<()> {
