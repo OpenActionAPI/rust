@@ -1,13 +1,6 @@
-use super::{Coordinates, SettingsValue};
+use super::{GenericInstancePayload, SettingsValue};
 
 use serde::Deserialize;
-
-#[derive(Clone, Debug, Deserialize)]
-pub struct DidReceiveSettingsPayload {
-	pub settings: SettingsValue,
-	#[allow(dead_code)]
-	pub coordinates: Coordinates,
-}
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct DidReceiveSettingsEvent {
@@ -15,7 +8,7 @@ pub struct DidReceiveSettingsEvent {
 	pub context: String,
 	#[allow(dead_code)]
 	pub device: String,
-	pub payload: DidReceiveSettingsPayload,
+	pub payload: GenericInstancePayload,
 }
 
 #[derive(Clone, Debug, Deserialize)]

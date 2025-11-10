@@ -2,10 +2,7 @@ use super::action::Action;
 use super::{ActionUuid, Instance};
 
 use crate::OpenActionResult as Result;
-use crate::inbound::{
-	DialPressPayload, DialRotatePayload, DidReceiveSettingsPayload, GenericInstancePayload,
-	TitleParametersDidChangePayload,
-};
+use crate::inbound::{DialPressPayload, DialRotatePayload, GenericInstancePayload, TitleParametersDidChangePayload};
 
 use async_trait::async_trait;
 
@@ -20,7 +17,7 @@ pub(super) trait ErasedAction: Send + Sync {
 	async fn call_dial_rotate(&self, instance: &Instance, event: DialRotatePayload) -> Result<()>;
 	async fn call_dial_down(&self, instance: &Instance, event: DialPressPayload) -> Result<()>;
 	async fn call_dial_up(&self, instance: &Instance, event: DialPressPayload) -> Result<()>;
-	async fn call_did_receive_settings(&self, instance: &Instance, event: DidReceiveSettingsPayload) -> Result<()>;
+	async fn call_did_receive_settings(&self, instance: &Instance, event: GenericInstancePayload) -> Result<()>;
 	async fn call_title_parameters_did_change(
 		&self,
 		instance: &Instance,
@@ -85,7 +82,7 @@ impl<A: Action> ErasedAction for ActionWrapper<A> {
 		self.0.dial_up(instance, &settings).await
 	}
 
-	async fn call_did_receive_settings(&self, instance: &Instance, event: DidReceiveSettingsPayload) -> Result<()> {
+	async fn call_did_receive_settings(&self, instance: &Instance, event: GenericInstancePayload) -> Result<()> {
 		let settings = deserialize_settings::<A>(event.settings);
 		self.0.did_receive_settings(instance, &settings).await
 	}

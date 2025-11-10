@@ -18,7 +18,7 @@ pub struct Instance {
 	/// The controller this instance is bound to
 	pub controller: String,
 	/// Coordinates on the device surface where this instance is bound
-	pub coordinates: Coordinates,
+	pub coordinates: Option<Coordinates>,
 	/// Whether or not this instance is part of a Multi Action
 	pub is_in_multi_action: bool,
 	/// Index of the currently active state within the states defined in the plugin manifest

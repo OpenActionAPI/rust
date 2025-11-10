@@ -34,7 +34,7 @@ pub struct Coordinates {
 #[serde(rename_all = "camelCase")]
 pub(crate) struct GenericInstancePayload {
 	pub settings: SettingsValue,
-	pub coordinates: Coordinates,
+	pub coordinates: Option<Coordinates>,
 	pub controller: String,
 	#[serde(default)]
 	pub state: u16,
