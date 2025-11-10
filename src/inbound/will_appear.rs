@@ -32,6 +32,7 @@ pub struct TitleParametersDidChangeEvent {
 pub struct TitleParametersDidChangePayload {
 	pub settings: SettingsValue,
 	pub coordinates: Coordinates,
+	#[serde(default)]
 	pub state: u16,
 	pub title: String,
 	pub titleParameters: TitleParameters,

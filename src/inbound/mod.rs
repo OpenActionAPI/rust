@@ -36,6 +36,7 @@ pub(crate) struct GenericInstancePayload {
 	pub settings: SettingsValue,
 	pub coordinates: Coordinates,
 	pub controller: String,
+	#[serde(default)]
 	pub state: u16,
 	pub is_in_multi_action: bool,
 }
