@@ -85,7 +85,7 @@ pub(crate) async fn handle_will_appear(event: AppearEvent) -> Result<()> {
 			controller: event.payload.controller.clone(),
 			coordinates: event.payload.coordinates,
 			is_in_multi_action: event.payload.is_in_multi_action,
-			current_state_index: event.payload.state,
+			current_state_index: std::sync::atomic::AtomicU16::new(event.payload.state),
 			settings_json: RwLock::new(event.payload.settings.clone()),
 		});
 		RUNTIME.instances.insert(instance_id.clone(), ins.clone());

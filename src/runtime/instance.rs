@@ -22,7 +22,7 @@ pub struct Instance {
 	/// Whether or not this instance is part of a Multi Action
 	pub is_in_multi_action: bool,
 	/// Index of the currently active state within the states defined in the plugin manifest
-	pub current_state_index: u16,
+	pub current_state_index: std::sync::atomic::AtomicU16,
 	pub(crate) settings_json: RwLock<Value>,
 }
 

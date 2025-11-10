@@ -6,13 +6,16 @@ use crate::inbound::{
 	TitleParametersDidChangeEvent,
 };
 
-async fn update_settings(instance: &super::instance::Instance, settings: &serde_json::Value) {
+use std::sync::atomic::Ordering::Relaxed;
+
+async fn update_instance(instance: &super::instance::Instance, state: u16, settings: &serde_json::Value) {
+	instance.current_state_index.store(state, Relaxed);
 	*instance.settings_json.write().await = settings.clone();
 }
 
 pub(crate) async fn handle_key_down(event: KeyEvent) -> Result<()> {
 	if let Some((action, instance)) = resolve(&event.action, &event.context).await? {
-		update_settings(&instance, &event.payload.settings).await;
+		update_instance(&instance, event.payload.state, &event.payload.settings).await;
 		action.call_key_down(&instance, event.payload).await?;
 	}
 	Ok(())
@@ -20,7 +23,7 @@ pub(crate) async fn handle_key_down(event: KeyEvent) -> Result<()> {
 
 pub(crate) async fn handle_key_up(event: KeyEvent) -> Result<()> {
 	if let Some((action, instance)) = resolve(&event.action, &event.context).await? {
-		update_settings(&instance, &event.payload.settings).await;
+		update_instance(&instance, event.payload.state, &event.payload.settings).await;
 		action.call_key_up(&instance, event.payload).await?;
 	}
 	Ok(())
@@ -28,7 +31,12 @@ pub(crate) async fn handle_key_up(event: KeyEvent) -> Result<()> {
 
 pub(crate) async fn handle_dial_rotate(event: DialRotateEvent) -> Result<()> {
 	if let Some((action, instance)) = resolve(&event.action, &event.context).await? {
-		update_settings(&instance, &event.payload.settings).await;
+		update_instance(
+			&instance,
+			instance.current_state_index.load(Relaxed),
+			&event.payload.settings,
+		)
+		.await;
 		action.call_dial_rotate(&instance, event.payload).await?;
 	}
 	Ok(())
@@ -36,7 +44,12 @@ pub(crate) async fn handle_dial_rotate(event: DialRotateEvent) -> Result<()> {
 
 pub(crate) async fn handle_dial_down(event: DialPressEvent) -> Result<()> {
 	if let Some((action, instance)) = resolve(&event.action, &event.context).await? {
-		update_settings(&instance, &event.payload.settings).await;
+		update_instance(
+			&instance,
+			instance.current_state_index.load(Relaxed),
+			&event.payload.settings,
+		)
+		.await;
 		action.call_dial_down(&instance, event.payload).await?;
 	}
 	Ok(())
@@ -44,7 +57,12 @@ pub(crate) async fn handle_dial_down(event: DialPressEvent) -> Result<()> {
 
 pub(crate) async fn handle_dial_up(event: DialPressEvent) -> Result<()> {
 	if let Some((action, instance)) = resolve(&event.action, &event.context).await? {
-		update_settings(&instance, &event.payload.settings).await;
+		update_instance(
+			&instance,
+			instance.current_state_index.load(Relaxed),
+			&event.payload.settings,
+		)
+		.await;
 		action.call_dial_up(&instance, event.payload).await?;
 	}
 	Ok(())
@@ -52,7 +70,7 @@ pub(crate) async fn handle_dial_up(event: DialPressEvent) -> Result<()> {
 
 pub(crate) async fn handle_did_receive_settings(event: DidReceiveSettingsEvent) -> Result<()> {
 	if let Some((action, instance)) = resolve(&event.action, &event.context).await? {
-		update_settings(&instance, &event.payload.settings).await;
+		update_instance(&instance, event.payload.state, &event.payload.settings).await;
 		action.call_did_receive_settings(&instance, event.payload).await?;
 	}
 	Ok(())
@@ -60,7 +78,7 @@ pub(crate) async fn handle_did_receive_settings(event: DidReceiveSettingsEvent) 
 
 pub(crate) async fn handle_title_parameters_did_change(event: TitleParametersDidChangeEvent) -> Result<()> {
 	if let Some((action, instance)) = resolve(&event.action, &event.context).await? {
-		update_settings(&instance, &event.payload.settings).await;
+		update_instance(&instance, event.payload.state, &event.payload.settings).await;
 		action
 			.call_title_parameters_did_change(&instance, event.payload)
 			.await?;
