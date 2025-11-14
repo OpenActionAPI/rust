@@ -2,6 +2,7 @@ mod devices;
 mod encoder;
 mod keypad;
 mod misc;
+mod property_inspector;
 mod settings;
 mod will_appear;
 
@@ -9,6 +10,7 @@ pub use devices::*;
 pub use encoder::*;
 pub use keypad::*;
 pub use misc::*;
+pub use property_inspector::*;
 pub use settings::*;
 pub use will_appear::*;
 
@@ -61,9 +63,10 @@ enum InboundEventType {
 	DidReceiveSettings(DidReceiveSettingsEvent),
 	WillAppear(AppearEvent),
 	WillDisappear(AppearEvent),
+	TitleParametersDidChange(TitleParametersDidChangeEvent),
 	PropertyInspectorDidAppear(PropertyInspectorAppearEvent),
 	PropertyInspectorDidDisappear(PropertyInspectorAppearEvent),
-	TitleParametersDidChange(TitleParametersDidChangeEvent),
+	SendToPlugin(SendToPluginEvent),
 }
 
 #[async_trait]
@@ -180,15 +183,16 @@ pub(crate) async fn process_incoming_messages(
 				InboundEventType::DidReceiveSettings(event) => runtime::handle_did_receive_settings(event).await,
 				InboundEventType::WillAppear(event) => crate::runtime::handle_will_appear(event).await,
 				InboundEventType::WillDisappear(event) => crate::runtime::handle_will_disappear(event).await,
+				InboundEventType::TitleParametersDidChange(event) => {
+					runtime::handle_title_parameters_did_change(event).await
+				}
 				InboundEventType::PropertyInspectorDidAppear(event) => {
 					runtime::handle_property_inspector_did_appear(event).await
 				}
 				InboundEventType::PropertyInspectorDidDisappear(event) => {
 					runtime::handle_property_inspector_did_disappear(event).await
 				}
-				InboundEventType::TitleParametersDidChange(event) => {
-					runtime::handle_title_parameters_did_change(event).await
-				}
+				InboundEventType::SendToPlugin(event) => runtime::handle_send_to_plugin(event).await,
 			} {
 				log::error!("Failed to process inbound event: {}", error)
 			}

@@ -11,14 +11,6 @@ pub struct AppearEvent {
 }
 
 #[derive(Clone, Debug, Deserialize)]
-pub struct PropertyInspectorAppearEvent {
-	pub action: String,
-	pub context: String,
-	#[allow(dead_code)]
-	pub device: String,
-}
-
-#[derive(Clone, Debug, Deserialize)]
 pub struct TitleParametersDidChangeEvent {
 	pub action: String,
 	pub context: String,

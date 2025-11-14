@@ -25,6 +25,7 @@ pub(super) trait ErasedAction: Send + Sync {
 	) -> Result<()>;
 	async fn call_pi_did_appear(&self, instance: &Instance) -> Result<()>;
 	async fn call_pi_did_disappear(&self, instance: &Instance) -> Result<()>;
+	async fn call_send_to_plugin(&self, instance: &Instance, payload: serde_json::Value) -> Result<()>;
 }
 
 fn deserialize_settings<A: Action>(json: serde_json::Value) -> A::Settings {
@@ -104,5 +105,10 @@ impl<A: Action> ErasedAction for ActionWrapper<A> {
 	async fn call_pi_did_disappear(&self, instance: &Instance) -> Result<()> {
 		let settings = deserialize_settings::<A>(instance.settings_json.read().await.clone());
 		self.0.property_inspector_did_disappear(instance, &settings).await
+	}
+
+	async fn call_send_to_plugin(&self, instance: &Instance, payload: serde_json::Value) -> Result<()> {
+		let settings = deserialize_settings::<A>(instance.settings_json.read().await.clone());
+		self.0.send_to_plugin(instance, &settings, &payload).await
 	}
 }

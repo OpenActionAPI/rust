@@ -3,7 +3,7 @@ use super::resolve;
 use crate::OpenActionResult as Result;
 use crate::inbound::{
 	DialPressEvent, DialRotateEvent, DidReceiveSettingsEvent, KeyEvent, PropertyInspectorAppearEvent,
-	TitleParametersDidChangeEvent,
+	SendToPluginEvent, TitleParametersDidChangeEvent,
 };
 
 use std::sync::atomic::Ordering::Relaxed;
@@ -96,6 +96,13 @@ pub(crate) async fn handle_property_inspector_did_appear(event: PropertyInspecto
 pub(crate) async fn handle_property_inspector_did_disappear(event: PropertyInspectorAppearEvent) -> Result<()> {
 	if let Some((action, instance)) = resolve(&event.action, &event.context).await? {
 		action.call_pi_did_disappear(&instance).await?;
+	}
+	Ok(())
+}
+
+pub(crate) async fn handle_send_to_plugin(event: SendToPluginEvent) -> Result<()> {
+	if let Some((action, instance)) = resolve(&event.action, &event.context).await? {
+		action.call_send_to_plugin(&instance, event.payload).await?;
 	}
 	Ok(())
 }

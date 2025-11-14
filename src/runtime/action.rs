@@ -79,4 +79,13 @@ pub trait Action: Send + Sync + 'static {
 	async fn property_inspector_did_disappear(&self, _instance: &Instance, _settings: &Self::Settings) -> Result<()> {
 		Ok(())
 	}
+
+	async fn send_to_plugin(
+		&self,
+		_instance: &Instance,
+		_settings: &Self::Settings,
+		_payload: &serde_json::Value,
+	) -> Result<()> {
+		Ok(())
+	}
 }
