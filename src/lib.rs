@@ -4,7 +4,14 @@ mod runtime;
 
 pub use crate::inbound::{Coordinates, TitleParametersDidChangePayload};
 pub use crate::runtime::*;
-pub use inbound::{GlobalEventHandler, set_global_event_handler};
+
+/// Events that do not relate to a specific instance of an action
+pub mod global_events {
+	pub use super::inbound::{
+		DeviceDidConnectEvent, DeviceDidDisconnectEvent, DidReceiveGlobalSettingsEvent, GlobalEventHandler,
+		SetBrightnessEvent, SetImageEvent, SystemDidWakeUpEvent, set_global_event_handler,
+	};
+}
 
 /// [`mod@async_trait`]
 pub use async_trait::async_trait;
