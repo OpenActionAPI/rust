@@ -21,8 +21,12 @@ struct LogMessagePayload {
 }
 
 impl OutboundEventManager {
-	pub(crate) async fn register(&mut self, event: String, uuid: String) -> Result<()> {
-		self.send_event(RegisterEvent { event, uuid }).await
+	pub(crate) async fn register(&mut self, event: String) -> Result<()> {
+		self.send_event(RegisterEvent {
+			event,
+			uuid: self.uuid.clone(),
+		})
+		.await
 	}
 
 	pub async fn open_url(&mut self, url: String) -> Result<()> {

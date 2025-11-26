@@ -59,8 +59,8 @@ pub async fn run(args: Vec<String>) -> OpenActionResult<()> {
 	let socket = connect_async(format!("ws://localhost:{}", port)).await?.0;
 	let (write, read) = socket.split();
 
-	let mut outbound = outbound::OutboundEventManager::new(write);
-	outbound.register(event, uuid).await?;
+	let mut outbound = outbound::OutboundEventManager::new(write, uuid);
+	outbound.register(event).await?;
 	runtime::set_outbound_manager(outbound).await;
 
 	inbound::process_incoming_messages(read).await;

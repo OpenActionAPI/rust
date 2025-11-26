@@ -1,4 +1,4 @@
-use super::{ContextAndPayloadEvent, ContextEvent, OutboundEventManager, PayloadEvent, SimpleEvent};
+use super::{ContextAndPayloadEvent, ContextEvent, OutboundEventManager, PayloadEvent};
 
 use crate::OpenActionResult as Result;
 
@@ -29,8 +29,9 @@ impl OutboundEventManager {
 	}
 
 	pub async fn get_global_settings(&mut self) -> Result<()> {
-		self.send_event(SimpleEvent {
+		self.send_event(ContextEvent {
 			event: "getGlobalSettings",
+			context: self.uuid.clone(),
 		})
 		.await
 	}

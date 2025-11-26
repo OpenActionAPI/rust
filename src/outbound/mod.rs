@@ -15,11 +15,12 @@ type Sink =
 /// A struct with methods for sending events to the OpenAction server
 pub(crate) struct OutboundEventManager {
 	sink: Sink,
+	uuid: String,
 }
 
 impl OutboundEventManager {
-	pub(crate) fn new(sink: Sink) -> Self {
-		Self { sink }
+	pub(crate) fn new(sink: Sink, uuid: String) -> Self {
+		Self { sink, uuid }
 	}
 
 	pub async fn send_event(&mut self, event: impl Serialize) -> Result<()> {
@@ -28,11 +29,6 @@ impl OutboundEventManager {
 			.await?;
 		Ok(())
 	}
-}
-
-#[derive(Serialize)]
-struct SimpleEvent {
-	event: &'static str,
 }
 
 #[derive(Serialize)]
