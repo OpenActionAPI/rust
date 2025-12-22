@@ -1,4 +1,4 @@
-use super::{ContextAndPayloadEvent, ContextEvent, OutboundEventManager, PayloadEvent};
+use super::{ContextAndPayloadEvent, ContextEvent, OutboundEventManager};
 
 use crate::OpenActionResult as Result;
 
@@ -21,8 +21,9 @@ impl OutboundEventManager {
 	}
 
 	pub async fn set_global_settings(&mut self, payload: serde_json::Value) -> Result<()> {
-		self.send_event(PayloadEvent {
+		self.send_event(ContextAndPayloadEvent {
 			event: "setGlobalSettings",
+			context: self.uuid.clone(),
 			payload,
 		})
 		.await
