@@ -1,4 +1,5 @@
 mod applications;
+mod deep_link;
 mod devices;
 mod encoder;
 mod keypad;
@@ -8,6 +9,7 @@ mod settings;
 mod will_appear;
 
 pub use applications::*;
+pub use deep_link::*;
 pub use devices::*;
 pub use encoder::*;
 pub use keypad::*;
@@ -57,6 +59,7 @@ enum InboundEventType {
 	DeviceDidDisconnect(DeviceDidDisconnectEvent),
 	ApplicationDidLaunch(ApplicationEvent),
 	ApplicationDidTerminate(ApplicationEvent),
+	DidReceiveDeepLink(DidReceiveDeepLinkEvent),
 	SystemDidWakeUp(SystemDidWakeUpEvent),
 	/* Action events */
 	KeyDown(KeyEvent),
@@ -105,6 +108,10 @@ pub trait GlobalEventHandler: Send + Sync {
 	}
 
 	async fn application_did_terminate(&self, _event: ApplicationEvent) -> Result<()> {
+		Ok(())
+	}
+
+	async fn did_receive_deep_link(&self, _event: DidReceiveDeepLinkEvent) -> Result<()> {
 		Ok(())
 	}
 
@@ -189,6 +196,13 @@ pub(crate) async fn process_incoming_messages(
 				InboundEventType::ApplicationDidTerminate(event) => {
 					if let Some(h) = GLOBAL_EVENT_HANDLER.get() {
 						h.application_did_terminate(event).await
+					} else {
+						Ok(())
+					}
+				}
+				InboundEventType::DidReceiveDeepLink(event) => {
+					if let Some(h) = GLOBAL_EVENT_HANDLER.get() {
+						h.did_receive_deep_link(event).await
 					} else {
 						Ok(())
 					}
