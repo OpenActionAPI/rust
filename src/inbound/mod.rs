@@ -1,3 +1,4 @@
+mod applications;
 mod devices;
 mod encoder;
 mod keypad;
@@ -6,6 +7,7 @@ mod property_inspector;
 mod settings;
 mod will_appear;
 
+pub use applications::*;
 pub use devices::*;
 pub use encoder::*;
 pub use keypad::*;
@@ -53,6 +55,8 @@ enum InboundEventType {
 	DidReceiveGlobalSettings(DidReceiveGlobalSettingsEvent),
 	DeviceDidConnect(DeviceDidConnectEvent),
 	DeviceDidDisconnect(DeviceDidDisconnectEvent),
+	ApplicationDidLaunch(ApplicationEvent),
+	ApplicationDidTerminate(ApplicationEvent),
 	SystemDidWakeUp(SystemDidWakeUpEvent),
 	/* Action events */
 	KeyDown(KeyEvent),
@@ -93,6 +97,14 @@ pub trait GlobalEventHandler: Send + Sync {
 	}
 
 	async fn device_did_disconnect(&self, _event: DeviceDidDisconnectEvent) -> Result<()> {
+		Ok(())
+	}
+
+	async fn application_did_launch(&self, _event: ApplicationEvent) -> Result<()> {
+		Ok(())
+	}
+
+	async fn application_did_terminate(&self, _event: ApplicationEvent) -> Result<()> {
 		Ok(())
 	}
 
@@ -163,6 +175,20 @@ pub(crate) async fn process_incoming_messages(
 				InboundEventType::DeviceDidDisconnect(event) => {
 					if let Some(h) = GLOBAL_EVENT_HANDLER.get() {
 						h.device_did_disconnect(event).await
+					} else {
+						Ok(())
+					}
+				}
+				InboundEventType::ApplicationDidLaunch(event) => {
+					if let Some(h) = GLOBAL_EVENT_HANDLER.get() {
+						h.application_did_launch(event).await
+					} else {
+						Ok(())
+					}
+				}
+				InboundEventType::ApplicationDidTerminate(event) => {
+					if let Some(h) = GLOBAL_EVENT_HANDLER.get() {
+						h.application_did_terminate(event).await
 					} else {
 						Ok(())
 					}
