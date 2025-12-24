@@ -6,6 +6,7 @@ mod keypad;
 mod misc;
 mod property_inspector;
 mod settings;
+mod states;
 mod will_appear;
 
 pub use applications::*;
@@ -16,6 +17,7 @@ pub use keypad::*;
 pub use misc::*;
 pub use property_inspector::*;
 pub use settings::*;
+pub use states::*;
 pub use will_appear::*;
 
 use crate::{OpenActionResult as Result, runtime::inbound as runtime};
