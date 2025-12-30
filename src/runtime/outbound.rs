@@ -2,6 +2,16 @@ use super::RUNTIME;
 
 use crate::OpenActionResult as Result;
 
+use serde::Serialize;
+
+/// Send an arbitrary JSON-serializable event to the OpenAction server
+pub async fn send_arbitrary_json(event: impl Serialize) -> Result<()> {
+	if let Some(mgr) = RUNTIME.outbound.lock().await.as_mut() {
+		mgr.send_event(event).await?;
+	}
+	Ok(())
+}
+
 /// <https://openaction.amankhanna.me/5_serverbound/settings.html#getglobalsettings>
 pub async fn get_global_settings() -> Result<()> {
 	if let Some(mgr) = RUNTIME.outbound.lock().await.as_mut() {
@@ -11,7 +21,7 @@ pub async fn get_global_settings() -> Result<()> {
 }
 
 /// <https://openaction.amankhanna.me/5_serverbound/settings.html#setglobalsettings>
-pub async fn set_global_settings(value: impl serde::Serialize) -> Result<()> {
+pub async fn set_global_settings(value: impl Serialize) -> Result<()> {
 	let value = serde_json::to_value(value)?;
 	if let Some(mgr) = RUNTIME.outbound.lock().await.as_mut() {
 		mgr.set_global_settings(value).await?;
