@@ -8,7 +8,7 @@ categories = [
 	"web-programming::websocket",
 ]
 authors = ["nekename"]
-version = "2.3.1"
+version = "2.4.0"
 edition = "2024"
 license = "MIT"
 readme = "README.md"
