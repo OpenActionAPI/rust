@@ -129,3 +129,14 @@ pub async fn visible_instances(action_uuid: ActionUuid) -> Vec<Arc<Instance>> {
 pub async fn get_instance(instance_id: InstanceId) -> Option<Arc<Instance>> {
 	RUNTIME.instances.get(&instance_id).as_deref().cloned()
 }
+
+pub(crate) static CONNECTED_DEVICES: LazyLock<DashMap<String, crate::inbound::DeviceInfo>> =
+	LazyLock::new(DashMap::new);
+
+/// List all connected devices
+pub async fn get_connected_devices() -> HashMap<String, crate::inbound::DeviceInfo> {
+	CONNECTED_DEVICES
+		.iter()
+		.map(|entry| (entry.key().clone(), entry.value().clone()))
+		.collect()
+}

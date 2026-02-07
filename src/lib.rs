@@ -55,6 +55,10 @@ pub async fn run(args: Vec<String>) -> OpenActionResult<()> {
 	let port = lookup("-port");
 	let uuid = lookup("-pluginuuid");
 	let event = lookup("-registerevent");
+	let info: inbound::registration::Info = serde_json::from_str(&lookup("-info"))?;
+	for device in info.devices {
+		runtime::CONNECTED_DEVICES.insert(device.id.clone(), device);
+	}
 
 	let socket = connect_async(format!("ws://localhost:{}", port)).await?.0;
 	let (write, read) = socket.split();

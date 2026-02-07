@@ -5,6 +5,7 @@ mod encoder;
 mod keypad;
 mod misc;
 mod property_inspector;
+pub(crate) mod registration;
 mod settings;
 mod states;
 mod will_appear;
@@ -175,6 +176,7 @@ pub(crate) async fn process_incoming_messages(
 					}
 				}
 				InboundEventType::DeviceDidConnect(event) => {
+					crate::runtime::CONNECTED_DEVICES.insert(event.device.clone(), event.deviceInfo.clone());
 					if let Some(h) = GLOBAL_EVENT_HANDLER.get() {
 						h.device_did_connect(event).await
 					} else {
@@ -182,6 +184,7 @@ pub(crate) async fn process_incoming_messages(
 					}
 				}
 				InboundEventType::DeviceDidDisconnect(event) => {
+					crate::runtime::CONNECTED_DEVICES.remove(&event.device);
 					if let Some(h) = GLOBAL_EVENT_HANDLER.get() {
 						h.device_did_disconnect(event).await
 					} else {
