@@ -9,6 +9,7 @@ pub struct DialRotatePayload {
 	pub coordinates: Coordinates,
 	pub ticks: i16,
 	pub pressed: bool,
+	pub state: u16,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -27,6 +28,7 @@ pub struct DialPressPayload {
 	pub settings: SettingsValue,
 	#[allow(dead_code)]
 	pub coordinates: Coordinates,
+	pub state: u16,
 }
 
 #[derive(Clone, Debug, Deserialize)]

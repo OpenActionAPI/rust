@@ -31,12 +31,7 @@ pub(crate) async fn handle_key_up(event: KeyEvent) -> Result<()> {
 
 pub(crate) async fn handle_dial_rotate(event: DialRotateEvent) -> Result<()> {
 	if let Some((action, instance)) = resolve(&event.action, &event.context).await? {
-		update_instance(
-			&instance,
-			instance.current_state_index.load(Relaxed),
-			&event.payload.settings,
-		)
-		.await;
+		update_instance(&instance, event.payload.state, &event.payload.settings).await;
 		action.call_dial_rotate(&instance, event.payload).await?;
 	}
 	Ok(())
@@ -44,12 +39,7 @@ pub(crate) async fn handle_dial_rotate(event: DialRotateEvent) -> Result<()> {
 
 pub(crate) async fn handle_dial_down(event: DialPressEvent) -> Result<()> {
 	if let Some((action, instance)) = resolve(&event.action, &event.context).await? {
-		update_instance(
-			&instance,
-			instance.current_state_index.load(Relaxed),
-			&event.payload.settings,
-		)
-		.await;
+		update_instance(&instance, event.payload.state, &event.payload.settings).await;
 		action.call_dial_down(&instance, event.payload).await?;
 	}
 	Ok(())
