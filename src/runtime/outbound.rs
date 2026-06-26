@@ -111,4 +111,11 @@ pub mod device_plugin {
 		}
 		Ok(())
 	}
+
+	pub async fn touchscreen_press(device: String, position: u8, x: u16, y: u16, hold: bool) -> Result<()> {
+		if let Some(mgr) = RUNTIME.outbound.lock().await.as_mut() {
+			mgr.touchscreen_press(device, position, x, y, hold).await?;
+		}
+		Ok(())
+	}
 }

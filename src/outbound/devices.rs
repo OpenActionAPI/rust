@@ -27,6 +27,15 @@ pub struct TicksPayload {
 	pub ticks: i16,
 }
 
+#[derive(Serialize)]
+pub struct TouchscreenPressPayload {
+	pub device: String,
+	pub position: u8,
+	pub x: u16,
+	pub y: u16,
+	pub hold: bool,
+}
+
 impl OutboundEventManager {
 	pub async fn register_device(
 		&mut self,
@@ -107,6 +116,20 @@ impl OutboundEventManager {
 		self.send_event(PayloadEvent {
 			event: "encoderUp",
 			payload: PressPayload { device, position },
+		})
+		.await
+	}
+
+	pub async fn touchscreen_press(&mut self, device: String, position: u8, x: u16, y: u16, hold: bool) -> Result<()> {
+		self.send_event(PayloadEvent {
+			event: "touchscreenPress",
+			payload: TouchscreenPressPayload {
+				device,
+				position,
+				x,
+				y,
+				hold,
+			},
 		})
 		.await
 	}
