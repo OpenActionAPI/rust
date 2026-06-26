@@ -57,6 +57,7 @@ impl Instance {
 		Ok(())
 	}
 
+	/// <https://openaction.amankhanna.me/5_serverbound/states.html#setfeedback>
 	pub async fn set_feedback(&self, feedback: &impl serde::Serialize) -> Result<()> {
 		if let Some(mgr) = self.outbound().await.as_mut() {
 			mgr.set_feedback(self.instance_id.clone(), feedback).await?;
@@ -64,6 +65,7 @@ impl Instance {
 		Ok(())
 	}
 
+	/// <https://openaction.amankhanna.me/5_serverbound/states.html#setfeedbacklayout>
 	pub async fn set_feedback_layout(&self, layout: String) -> Result<()> {
 		if let Some(mgr) = self.outbound().await.as_mut() {
 			mgr.set_feedback_layout(self.instance_id.clone(), layout).await?;

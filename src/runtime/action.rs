@@ -55,6 +55,7 @@ pub trait Action: Send + Sync + 'static {
 		Ok(())
 	}
 
+	/// <https://openaction.amankhanna.me/4_clientbound/encoder.html#touchtap>
 	async fn touch_tap(
 		&self,
 		_instance: &Instance,
