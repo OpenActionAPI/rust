@@ -55,6 +55,17 @@ pub trait Action: Send + Sync + 'static {
 		Ok(())
 	}
 
+	/// <https://openaction.amankhanna.me/4_clientbound/encoder.html#touchtap>
+	async fn touch_tap(
+		&self,
+		_instance: &Instance,
+		_settings: &Self::Settings,
+		_position: (u16, u16),
+		_hold: bool,
+	) -> Result<()> {
+		Ok(())
+	}
+
 	/// <https://openaction.amankhanna.me/4_clientbound/settings.html#didreceivesettings>
 	async fn did_receive_settings(&self, _instance: &Instance, _settings: &Self::Settings) -> Result<()> {
 		Ok(())

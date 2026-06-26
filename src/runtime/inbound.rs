@@ -3,7 +3,7 @@ use super::resolve;
 use crate::OpenActionResult as Result;
 use crate::inbound::{
 	DialPressEvent, DialRotateEvent, DidReceiveSettingsEvent, KeyEvent, PropertyInspectorAppearEvent,
-	SendToPluginEvent, TitleParametersDidChangeEvent,
+	SendToPluginEvent, TitleParametersDidChangeEvent, TouchTapEvent,
 };
 
 use std::sync::atomic::Ordering::Relaxed;
@@ -64,6 +64,19 @@ pub(crate) async fn handle_dial_up(event: DialPressEvent) -> Result<()> {
 		)
 		.await;
 		action.call_dial_up(&instance, event.payload).await?;
+	}
+	Ok(())
+}
+
+pub(crate) async fn handle_touch_tap(event: TouchTapEvent) -> Result<()> {
+	if let Some((action, instance)) = resolve(&event.action, &event.context).await? {
+		update_instance(
+			&instance,
+			instance.current_state_index.load(Relaxed),
+			&event.payload.settings,
+		)
+		.await;
+		action.call_touch_tap(&instance, event.payload).await?;
 	}
 	Ok(())
 }

@@ -21,6 +21,11 @@ struct SetStatePayload {
 	state: u16,
 }
 
+#[derive(Serialize)]
+struct SetFeedbackLayoutPayload {
+	layout: String,
+}
+
 impl OutboundEventManager {
 	pub async fn set_title(&mut self, context: String, title: Option<String>, state: Option<u16>) -> Result<()> {
 		self.send_event(ContextAndPayloadEvent {
@@ -45,6 +50,24 @@ impl OutboundEventManager {
 			event: "setState",
 			context,
 			payload: SetStatePayload { state },
+		})
+		.await
+	}
+
+	pub async fn set_feedback(&mut self, context: String, feedback: &impl serde::Serialize) -> Result<()> {
+		self.send_event(ContextAndPayloadEvent {
+			event: "setFeedback",
+			context,
+			payload: feedback,
+		})
+		.await
+	}
+
+	pub async fn set_feedback_layout(&mut self, context: String, layout: String) -> Result<()> {
+		self.send_event(ContextAndPayloadEvent {
+			event: "setFeedbackLayout",
+			context,
+			payload: SetFeedbackLayoutPayload { layout },
 		})
 		.await
 	}
