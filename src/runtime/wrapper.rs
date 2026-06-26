@@ -87,10 +87,8 @@ impl<A: Action> ErasedAction for ActionWrapper<A> {
 	}
 
 	async fn call_touch_tap(&self, instance: &Instance, event: TouchTapPayload) -> Result<()> {
-		let settings = deserialize_settings::<A>(event.settings.clone());
-		self.0
-			.touch_tap(instance, &settings, event.tap_position, event.hold)
-			.await
+		let settings = deserialize_settings::<A>(event.settings);
+		self.0.touch_tap(instance, &settings, event.tapPos, event.hold).await
 	}
 
 	async fn call_did_receive_settings(&self, instance: &Instance, event: GenericInstancePayload) -> Result<()> {

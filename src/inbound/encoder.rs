@@ -41,11 +41,12 @@ pub struct DialPressEvent {
 #[derive(Clone, Debug, Deserialize)]
 #[allow(non_snake_case)]
 pub struct TouchTapPayload {
+	#[allow(dead_code)]
+	pub controller: String,
 	pub settings: SettingsValue,
 	#[allow(dead_code)]
 	pub coordinates: Coordinates,
-	#[serde(alias = "tapPos")]
-	pub tap_position: (u16, u16),
+	pub tapPos: (u16, u16),
 	pub hold: bool,
 }
 
