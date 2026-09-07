@@ -64,6 +64,7 @@ enum InboundEventType {
 	ApplicationDidTerminate(ApplicationEvent),
 	DidReceiveDeepLink(DidReceiveDeepLinkEvent),
 	SystemDidWakeUp(SystemDidWakeUpEvent),
+	ShowSettingsInterface(ShowSettingsInterfaceEvent),
 	/* Action events */
 	KeyDown(KeyEvent),
 	KeyUp(KeyEvent),
@@ -120,6 +121,10 @@ pub trait GlobalEventHandler: Send + Sync {
 	}
 
 	async fn system_did_wake_up(&self, _event: SystemDidWakeUpEvent) -> Result<()> {
+		Ok(())
+	}
+
+	async fn show_settings_interface(&self, _event: ShowSettingsInterfaceEvent) -> Result<()> {
 		Ok(())
 	}
 }
@@ -216,6 +221,13 @@ pub(crate) async fn process_incoming_messages(
 				InboundEventType::SystemDidWakeUp(event) => {
 					if let Some(h) = GLOBAL_EVENT_HANDLER.get() {
 						h.system_did_wake_up(event).await
+					} else {
+						Ok(())
+					}
+				}
+				InboundEventType::ShowSettingsInterface(event) => {
+					if let Some(h) = GLOBAL_EVENT_HANDLER.get() {
+						h.show_settings_interface(event).await
 					} else {
 						Ok(())
 					}
