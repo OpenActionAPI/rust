@@ -9,7 +9,7 @@ pub use crate::runtime::*;
 pub mod global_events {
 	pub use super::inbound::{
 		DeviceDidConnectEvent, DeviceDidDisconnectEvent, DidReceiveGlobalSettingsEvent, GlobalEventHandler,
-		SetBrightnessEvent, SetImageEvent, SystemDidWakeUpEvent, set_global_event_handler,
+		SetBrightnessEvent, SetImageEvent, ShowSettingsInterfaceEvent, SystemDidWakeUpEvent, set_global_event_handler,
 	};
 }
 

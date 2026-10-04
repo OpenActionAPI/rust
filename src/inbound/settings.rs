@@ -20,3 +20,6 @@ pub struct DidReceiveGlobalSettingsPayload {
 pub struct DidReceiveGlobalSettingsEvent {
 	pub payload: DidReceiveGlobalSettingsPayload,
 }
+
+#[derive(Clone, Debug, Deserialize)]
+pub struct ShowSettingsInterfaceEvent {}
