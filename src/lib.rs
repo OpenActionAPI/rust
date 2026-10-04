@@ -60,7 +60,7 @@ pub async fn run(args: Vec<String>) -> OpenActionResult<()> {
 		runtime::CONNECTED_DEVICES.insert(device.id.clone(), device);
 	}
 
-	let socket = connect_async(format!("ws://localhost:{}", port)).await?.0;
+	let socket = connect_async(format!("ws://127.0.0.1:{}", port)).await?.0;
 	let (write, read) = socket.split();
 
 	let mut outbound = outbound::OutboundEventManager::new(write, uuid);
