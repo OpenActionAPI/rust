@@ -49,6 +49,8 @@ pub async fn log_message(message: String) -> Result<()> {
 pub mod device_plugin {
 	use super::{RUNTIME, Result};
 
+	pub use crate::outbound::devices::{DeviceDecoration, DeviceDescriptor, DeviceSlot, EncoderAlignment};
+
 	pub async fn register_device(
 		id: String,
 		name: String,
@@ -59,6 +61,22 @@ pub mod device_plugin {
 	) -> Result<()> {
 		if let Some(mgr) = RUNTIME.outbound.lock().await.as_mut() {
 			mgr.register_device(id, name, rows, columns, encoders, r#type).await?;
+		}
+		Ok(())
+	}
+
+	/// Register a device, together with how it presents itself
+	pub async fn register_device_with(descriptor: DeviceDescriptor) -> Result<()> {
+		if let Some(mgr) = RUNTIME.outbound.lock().await.as_mut() {
+			mgr.register_device_with(descriptor).await?;
+		}
+		Ok(())
+	}
+
+	/// Set (or clear) the image drawn behind the buttons of a device
+	pub async fn set_device_background(device: String, background: Option<String>) -> Result<()> {
+		if let Some(mgr) = RUNTIME.outbound.lock().await.as_mut() {
+			mgr.set_device_background(device, background).await?;
 		}
 		Ok(())
 	}
